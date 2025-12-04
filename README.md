@@ -470,7 +470,7 @@ NOMINATIM_EMAIL=your-email@example.com
 ### 🏠 Dashboard
 
 <p align="center">
-  <img src="./screenshots/dashboard.png" alt="Dashboard" width="100%">
+  <img src="./screenshots/Dashboard.png" alt="Dashboard" width="100%">
 </p>
 
 _Dashboard dengan statistik real-time, grafik status penanganan limbah, dan laporan terbaru._
@@ -478,7 +478,7 @@ _Dashboard dengan statistik real-time, grafik status penanganan limbah, dan lapo
 ### 🗺️ Peta Interaktif
 
 <p align="center">
-  <img src="./screenshots/map.png" alt="Peta Interaktif" width="100%">
+  <img src="./screenshots/Map.png" alt="Peta Interaktif" width="100%">
 </p>
 
 _Visualisasi titik limbah dengan marker berwarna berdasarkan status dan popup informasi detail._
@@ -486,26 +486,10 @@ _Visualisasi titik limbah dengan marker berwarna berdasarkan status dan popup in
 ### 🌡️ Analisis Lingkungan
 
 <p align="center">
-  <img src="./screenshots/environment.png" alt="Analisis Lingkungan" width="100%">
+  <img src="./screenshots/Analisis Lingkungan.png" alt="Analisis Lingkungan" width="100%">
 </p>
 
 _Informasi cuaca real-time dan rekomendasi pengelolaan limbah berdasarkan kondisi lingkungan._
-
-### 📋 Manajemen Laporan
-
-<p align="center">
-  <img src="./screenshots/reports.png" alt="Laporan" width="100%">
-</p>
-
-_Sistem pelaporan dan monitoring status penanganan limbah._
-
-### 🔐 Halaman Login
-
-<p align="center">
-  <img src="./screenshots/login.png" alt="Login" width="100%">
-</p>
-
-_Halaman login dengan tema nature/forest._
 
 ---
 
