@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoWaste - Aplikasi Manajemen Limbah</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+      <div class="login-container">
+        <div class="login-box" id="loginBox">
+          <h1>🌍 GeoWaste</h1>
+          <p class="subtitle">Sistem Manajemen Limbah Terintegrasi</p>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="loginEmail">Email:</label>
+              <input type="email" id="loginEmail" required placeholder="contoh@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password:</label>
+              <input type="password" id="loginPassword" required placeholder="Masukkan password" />
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+
+          <p class="toggle-text">
+            Belum punya akun? <a href="#" id="showRegister">Daftar di sini</a>
+          </p>
+          <div id="loginError" class="error-msg" style="display: none"></div>
+        </div>
+
+        <div id="registerBox" class="login-box" style="display: none">
+          <h2>📝 Daftar Akun Baru</h2>
+
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="registerName">Nama:</label>
+              <input type="text" id="registerName" required placeholder="Nama lengkap" />
+            </div>
+            <div class="form-group">
+              <label for="registerEmail">Email:</label>
+              <input type="email" id="registerEmail" required placeholder="contoh@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Password:</label>
+              <input
+                type="password"
+                id="registerPassword"
+                required
+                placeholder="Minimal 6 karakter"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Daftar</button>
+          </form>
+
+          <p class="toggle-text">Sudah punya akun? <a href="#" id="showLogin">Login di sini</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="page" style="display: none">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1>🌍 GeoWaste</h1>
+          <div class="header-right">
+            <span id="userName" class="user-name"></span>
+            <span id="userRole" class="user-role"></span>
+            <button id="logoutBtn" class="btn btn-danger">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav class="navbar">
+        <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
+        <button class="nav-btn" data-page="wastepoints">📍 Titik Limbah</button>
+        <button class="nav-btn" data-page="reports">📋 Laporan</button>
+        <button class="nav-btn" data-page="environment">🌡️ Lingkungan</button>
+        <button class="nav-btn admin-only" data-page="users" style="display: none">👥 User</button>
+      </nav>
+
+      <!-- Dashboard Page -->
+      <div id="dashboard" class="page-content active">
+        <h2>📊 Dashboard</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Titik Limbah</h3>
+            <p id="totalWastePoints" class="stat-number">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Laporan</h3>
+            <p id="totalReports" class="stat-number">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Pengguna Aktif</h3>
+            <p id="totalUsers" class="stat-number">0</p>
+          </div>
+        </div>
+        <div class="content-section">
+          <h3>📋 Laporan Terbaru</h3>
+          <div id="recentReports" class="table-container">
+            <p class="empty-state">Tidak ada laporan</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waste Points Page -->
+      <div id="wastepoints" class="page-content" style="display: none">
+        <div class="page-header">
+          <h2>📍 Titik Limbah</h2>
+          <button class="btn btn-primary staff-only" id="addWastePointBtn" style="display: none">
+            + Tambah Titik
+          </button>
+        </div>
+
+        <!-- Map Container -->
+        <div class="card map-card">
+          <h3>🗺️ Peta Titik Limbah</h3>
+          <div id="wastePointsMap" style="height: 400px; border-radius: 8px; z-index: 1"></div>
+          <div class="map-legend">
+            <span class="legend-item"
+              ><span class="legend-color" style="background: #e74c3c"></span> Baru</span
+            >
+            <span class="legend-item"
+              ><span class="legend-color" style="background: #f39c12"></span> Ditinjau</span
+            >
+            <span class="legend-item"
+              ><span class="legend-color" style="background: #27ae60"></span> Selesai</span
+            >
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <select id="wasteTypeFilter">
+            <option value="">Semua Jenis</option>
+            <option value="organik">Organik</option>
+            <option value="anorganik">Anorganik</option>
+            <option value="B3">B3</option>
+            <option value="campuran">Campuran</option>
+          </select>
+          <select id="wasteStatusFilter">
+            <option value="">Semua Status</option>
+            <option value="baru">Baru</option>
+            <option value="ditinjau">Ditinjau</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
+        <div id="wastePointsList" class="table-container">
+          <p class="empty-state">Tidak ada data</p>
+        </div>
+      </div>
+
+      <!-- Reports Page -->
+      <div id="reports" class="page-content" style="display: none">
+        <div class="page-header">
+          <h2>📋 Laporan</h2>
+          <button class="btn btn-primary" id="addReportBtn">+ Buat Laporan</button>
+        </div>
+        <div class="filter-group">
+          <select id="reportStatusFilter">
+            <option value="">Semua Status</option>
+            <option value="baru">Baru</option>
+            <option value="diproses">Diproses</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
+        <div id="reportsList" class="table-container">
+          <p class="empty-state">Tidak ada laporan</p>
+        </div>
+      </div>
+
+      <!-- Environment Page -->
+      <div id="environment" class="page-content" style="display: none">
+        <h2>🌡️ Analisis Lingkungan</h2>
+        <div class="card">
+          <form id="envForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="envLat">Latitude:</label>
+                <input type="number" id="envLat" placeholder="-6.2088" step="0.0001" required />
+              </div>
+              <div class="form-group">
+                <label for="envLon">Longitude:</label>
+                <input type="number" id="envLon" placeholder="106.8456" step="0.0001" required />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">🔍 Analisis</button>
+          </form>
+        </div>
+        <div id="envResult" class="card" style="display: none">
+          <h3>Hasil Analisis</h3>
+          <div id="envResultContent"></div>
+        </div>
+      </div>
+
+      <!-- Users Page (Admin) -->
+      <div id="users" class="page-content" style="display: none">
+        <div class="page-header">
+          <h2>👥 Manajemen User</h2>
+          <button class="btn btn-primary" id="addUserBtn">+ Tambah User</button>
+        </div>
+        <div id="usersList" class="table-container">
+          <p class="empty-state">Tidak ada pengguna</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Waste Point Modal -->
+    <div id="wastePointModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="wastePointModalTitle">Tambah Titik Limbah</h3>
+          <button class="close-btn" id="closeWpModal">&times;</button>
+        </div>
+        <form id="wastePointForm">
+          <input type="hidden" id="wpId" />
+          <div class="form-group">
+            <label for="wpName">Nama Lokasi:</label>
+            <input type="text" id="wpName" required />
+          </div>
+          <div class="form-group">
+            <label for="wpDescription">Deskripsi:</label>
+            <textarea id="wpDescription" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="wpType">Jenis Limbah:</label>
+            <select id="wpType" required>
+              <option value="">Pilih jenis</option>
+              <option value="organik">Organik</option>
+              <option value="anorganik">Anorganik</option>
+              <option value="B3">B3</option>
+              <option value="campuran">Campuran</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wpLat">Latitude:</label>
+              <input type="number" id="wpLat" step="0.0001" required />
+            </div>
+            <div class="form-group">
+              <label for="wpLon">Longitude:</label>
+              <input type="number" id="wpLon" step="0.0001" required />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <button type="button" class="btn btn-secondary" id="cancelWpModal">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Buat Laporan Baru</h3>
+          <button class="close-btn" id="closeReportModal">&times;</button>
+        </div>
+        <form id="reportForm">
+          <div class="form-group">
+            <label for="reportSiteId">Pilih Titik Limbah:</label>
+            <select id="reportSiteId" required></select>
+          </div>
+          <div class="form-group">
+            <label for="reportDescription">Deskripsi:</label>
+            <textarea id="reportDescription" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="reportPhoto">Foto (URL):</label>
+            <input type="url" id="reportPhoto" placeholder="https://..." />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary">Kirim</button>
+            <button type="button" class="btn btn-secondary" id="cancelReportModal">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="userModalTitle">Tambah User</h3>
+          <button class="close-btn" id="closeUserModal">&times;</button>
+        </div>
+        <form id="userForm">
+          <div class="form-group">
+            <label for="userNameInput">Nama:</label>
+            <input type="text" id="userNameInput" required />
+          </div>
+          <div class="form-group">
+            <label for="userEmailInput">Email:</label>
+            <input type="email" id="userEmailInput" required />
+          </div>
+          <div class="form-group">
+            <label for="userPasswordInput">Password:</label>
+            <input type="password" id="userPasswordInput" required />
+          </div>
+          <div class="form-group">
+            <label for="userRoleSelect">Role:</label>
+            <select id="userRoleSelect" required>
+              <option value="warga">Warga</option>
+              <option value="petugas">Petugas</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <button type="button" class="btn btn-secondary" id="cancelUserModal">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification" style="display: none"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

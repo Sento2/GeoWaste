@@ -1,0 +1,12 @@
+
+{
+  "extends": "@adonisjs/tsconfig/tsconfig.app.json",
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./build",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,                 // ⬅️ tambah
+    "allowSyntheticDefaultImports": true     // ⬅️ tambah
+  }
+}
