@@ -1,5 +1,5 @@
 // ============= CONFIG =============
-const API_BASE_URL = 'http://localhost:49684'
+const API_BASE_URL = 'http://localhost:3333'
 let currentUser = null
 let currentToken = null
 let wastePointsMap = null
@@ -191,13 +191,37 @@ function navigateTo(page) {
 // ============= DASHBOARD =============
 async function loadDashboard() {
   try {
+    // Update welcome text
+    document.getElementById('welcomeText').textContent =
+      `Hai ${currentUser?.name || 'User'}! Ini adalah ringkasan aktivitas hari ini.`
+
+    // Update date and time
+    updateDateTime()
+    setInterval(updateDateTime, 1000)
+
     const [wpRes, reportsRes] = await Promise.all([
       apiCall('/api/v1/wastepoints'),
       apiCall('/api/v1/reports'),
     ])
 
-    document.getElementById('totalWastePoints').textContent = wpRes.data?.length || 0
-    document.getElementById('totalReports').textContent = reportsRes.data?.length || 0
+    const wastePoints = wpRes.data || []
+    const reports = reportsRes.data || []
+
+    document.getElementById('totalWastePoints').textContent = wastePoints.length
+    document.getElementById('totalReports').textContent = reports.length
+
+    // Count pending reports
+    const pendingCount = reports.filter(
+      (r) => r.status === 'diproses' || r.status === 'baru'
+    ).length
+    document.getElementById('pendingReports').textContent = `${pendingCount} pending`
+
+    // Count today's activity
+    const today = new Date().toDateString()
+    const todayReports = reports.filter(
+      (r) => new Date(r.reported_at).toDateString() === today
+    ).length
+    document.getElementById('todayActivity').textContent = todayReports
 
     // Try to load users count (admin only)
     try {
@@ -207,41 +231,88 @@ async function loadDashboard() {
       document.getElementById('totalUsers').textContent = '-'
     }
 
-    // Recent reports
-    const recent = (reportsRes.data || []).slice(0, 5)
+    // Waste type statistics
+    const organikCount = wastePoints.filter((wp) => wp.waste_type === 'organik').length
+    const anorganikCount = wastePoints.filter((wp) => wp.waste_type === 'anorganik').length
+    const b3Count = wastePoints.filter((wp) => wp.waste_type === 'B3').length
+    const campuranCount = wastePoints.filter((wp) => wp.waste_type === 'campuran').length
+
+    document.getElementById('organikCount').textContent = organikCount
+    document.getElementById('anorganikCount').textContent = anorganikCount
+    document.getElementById('b3Count').textContent = b3Count
+    document.getElementById('campuranCount').textContent = campuranCount
+
+    // Status overview bar
+    const baruCount = wastePoints.filter((wp) => wp.status === 'baru').length
+    const ditinjauCount = wastePoints.filter((wp) => wp.status === 'ditinjau').length
+    const selesaiCount = wastePoints.filter((wp) => wp.status === 'selesai').length
+    const total = wastePoints.length || 1
+
+    document.getElementById('baruBar').style.width = `${(baruCount / total) * 100}%`
+    document.getElementById('ditinjauBar').style.width = `${(ditinjauCount / total) * 100}%`
+    document.getElementById('selesaiBar').style.width = `${(selesaiCount / total) * 100}%`
+
+    // Recent reports with new design
+    const recent = reports.slice(0, 5)
     document.getElementById('recentReports').innerHTML =
       recent.length > 0
-        ? `<table>
-                <thead><tr><th>ID</th><th>Deskripsi</th><th>Status</th><th>Tanggal</th></tr></thead>
-                <tbody>${recent
-                  .map(
-                    (r) => `
-                    <tr>
-                        <td>${r._id.substring(0, 8)}</td>
-                        <td>${r.description || '-'}</td>
-                        <td><span class="status-badge status-${r.status}">${r.status}</span></td>
-                        <td>${new Date(r.reported_at).toLocaleDateString('id-ID')}</td>
-                    </tr>
-                `
-                  )
-                  .join('')}</tbody>
-            </table>`
-        : '<p class="empty-state">Tidak ada laporan</p>'
+        ? `<div class="recent-reports-list">
+            ${recent
+              .map(
+                (r, index) => `
+              <div class="recent-report-item" style="animation-delay: ${index * 0.1}s">
+                <div class="report-icon ${r.status}">📄</div>
+                <div class="report-info">
+                  <p class="report-desc">${r.description || 'Tidak ada deskripsi'}</p>
+                  <span class="report-meta">
+                    <span class="report-id">#${r._id.substring(0, 8)}</span>
+                    <span class="report-date">${new Date(r.reported_at).toLocaleDateString('id-ID')}</span>
+                  </span>
+                </div>
+                <span class="status-badge-new status-${r.status}">${r.status}</span>
+              </div>
+            `
+              )
+              .join('')}
+          </div>`
+        : '<p class="empty-state">Tidak ada laporan terbaru</p>'
   } catch (err) {
     showNotification(err.message, 'error')
   }
+}
+
+function updateDateTime() {
+  const now = new Date()
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+  document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options)
+  document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID')
 }
 
 // ============= WASTE POINTS =============
 async function loadWastePoints() {
   try {
     const res = await apiCall('/api/v1/wastepoints')
-    let data = res.data || []
+    let allData = res.data || []
+    let data = [...allData]
 
     const typeFilter = document.getElementById('wasteTypeFilter').value
     const statusFilter = document.getElementById('wasteStatusFilter').value
     if (typeFilter) data = data.filter((d) => d.waste_type === typeFilter)
     if (statusFilter) data = data.filter((d) => d.status === statusFilter)
+
+    // Update stats
+    document.getElementById('wpBaruCount').textContent = allData.filter(
+      (d) => d.status === 'baru'
+    ).length
+    document.getElementById('wpDitinjauCount').textContent = allData.filter(
+      (d) => d.status === 'ditinjau'
+    ).length
+    document.getElementById('wpSelesaiCount').textContent = allData.filter(
+      (d) => d.status === 'selesai'
+    ).length
+    document.getElementById('wpTotalCount').textContent = allData.length
+    document.getElementById('wpFilterResult').textContent =
+      `Menampilkan ${data.length} dari ${allData.length} data`
 
     // Initialize or update map
     initWastePointsMap(data)
@@ -249,37 +320,57 @@ async function loadWastePoints() {
     const isStaff = ['admin', 'petugas'].includes(currentUser.role)
     const isAdmin = currentUser.role === 'admin'
 
+    // New card-based layout
     document.getElementById('wastePointsList').innerHTML =
       data.length > 0
-        ? `<table>
-                <thead><tr><th>Nama</th><th>Jenis</th><th>Status</th><th>Koordinat</th>${isStaff ? '<th>Aksi</th>' : ''}</tr></thead>
-                <tbody>${data
-                  .map(
-                    (wp) => `
-                    <tr>
-                        <td>${wp.name}</td>
-                        <td>${wp.waste_type}</td>
-                        <td><span class="status-badge status-${wp.status}">${wp.status}</span></td>
-                        <td>${wp.coordinates.join(', ')}</td>
-                        ${
-                          isStaff
-                            ? `<td>
-                            <div class="action-btns">
-                                <button class="btn btn-primary" onclick="editWastePoint('${wp._id}')">Edit</button>
-                                ${isAdmin ? `<button class="btn btn-danger" onclick="deleteWastePoint('${wp._id}')">Hapus</button>` : ''}
-                            </div>
-                        </td>`
-                            : ''
-                        }
-                    </tr>
-                `
-                  )
-                  .join('')}</tbody>
-            </table>`
-        : '<p class="empty-state">Tidak ada data titik limbah</p>'
+        ? `<div class="wp-cards-grid">
+            ${data
+              .map(
+                (wp, index) => `
+              <div class="wp-card" style="animation-delay: ${index * 0.05}s">
+                <div class="wp-card-header">
+                  <span class="wp-type-badge ${wp.waste_type}">${getWasteTypeIcon(wp.waste_type)} ${wp.waste_type}</span>
+                  <span class="wp-status-dot ${wp.status}" title="${wp.status}"></span>
+                </div>
+                <div class="wp-card-body">
+                  <h4 class="wp-name">${wp.name}</h4>
+                  <p class="wp-desc">${wp.description || 'Tidak ada deskripsi'}</p>
+                  <div class="wp-coords">
+                    <span class="coord-badge">📍 ${wp.coordinates[1]?.toFixed(6)}, ${wp.coordinates[0]?.toFixed(6)}</span>
+                  </div>
+                </div>
+                <div class="wp-card-footer">
+                  <span class="wp-status-badge ${wp.status}">${wp.status}</span>
+                  ${
+                    isStaff
+                      ? `
+                    <div class="wp-actions">
+                      <button class="wp-btn edit" onclick="editWastePoint('${wp._id}')" title="Edit">✏️</button>
+                      ${isAdmin ? `<button class="wp-btn delete" onclick="deleteWastePoint('${wp._id}')" title="Hapus">🗑️</button>` : ''}
+                    </div>
+                  `
+                      : ''
+                  }
+                </div>
+              </div>
+            `
+              )
+              .join('')}
+          </div>`
+        : '<div class="empty-state-box"><span class="empty-icon">📭</span><p>Tidak ada data titik limbah</p><span class="empty-hint">Coba ubah filter atau tambah data baru</span></div>'
   } catch (err) {
     showNotification(err.message, 'error')
   }
+}
+
+function getWasteTypeIcon(type) {
+  const icons = {
+    organik: '🌿',
+    anorganik: '♻️',
+    B3: '☢️',
+    campuran: '🔀',
+  }
+  return icons[type] || '📦'
 }
 
 // ============= MAP FUNCTIONS =============
@@ -332,7 +423,7 @@ function initWastePointsMap(wastePoints) {
         <div class="popup-content">
           <p><strong>Jenis:</strong> ${wp.waste_type}</p>
           <p><strong>Deskripsi:</strong> ${wp.description || '-'}</p>
-          <p><strong>Koordinat:</strong> ${lat.toFixed(4)}, ${lon.toFixed(4)}</p>
+          <p><strong>Koordinat:</strong> ${lat.toFixed(6)}, ${lon.toFixed(8)}</p>
           <span class="popup-status ${wp.status}">${wp.status}</span>
         </div>
       `)
@@ -355,13 +446,13 @@ function initWastePointsMap(wastePoints) {
 function getStatusColor(status) {
   switch (status) {
     case 'baru':
-      return '#e74c3c'
+      return '#4a90a4' // Sky blue
     case 'ditinjau':
-      return '#f39c12'
+      return '#c17f59' // Sunset orange
     case 'selesai':
-      return '#27ae60'
+      return '#2d5a27' // Forest green
     default:
-      return '#3498db'
+      return '#5d4e37' // Earth brown
   }
 }
 
@@ -369,11 +460,15 @@ function openWastePointModal() {
   document.getElementById('wastePointForm').reset()
   document.getElementById('wpId').value = ''
   document.getElementById('wastePointModalTitle').textContent = 'Tambah Titik Limbah'
+  // Sembunyikan field status saat tambah baru (status otomatis 'baru')
+  document.getElementById('wpStatusGroup').style.display = 'none'
   document.getElementById('wastePointModal').classList.add('active')
 }
 
 function closeWastePointModal() {
   document.getElementById('wastePointModal').classList.remove('active')
+  // Reset tampilan field status
+  document.getElementById('wpStatusGroup').style.display = 'none'
 }
 
 async function handleSaveWastePoint(e) {
@@ -387,6 +482,11 @@ async function handleSaveWastePoint(e) {
       parseFloat(document.getElementById('wpLon').value),
       parseFloat(document.getElementById('wpLat').value),
     ],
+  }
+
+  // Tambahkan status jika sedang edit (field visible)
+  if (id && document.getElementById('wpStatusGroup').style.display !== 'none') {
+    data.status = document.getElementById('wpStatus').value
   }
 
   try {
@@ -413,9 +513,12 @@ async function editWastePoint(id) {
       document.getElementById('wpName').value = wp.name
       document.getElementById('wpDescription').value = wp.description || ''
       document.getElementById('wpType').value = wp.waste_type
+      document.getElementById('wpStatus').value = wp.status || 'baru'
       document.getElementById('wpLon').value = wp.coordinates[0]
       document.getElementById('wpLat').value = wp.coordinates[1]
       document.getElementById('wastePointModalTitle').textContent = 'Edit Titik Limbah'
+      // Tampilkan field status saat edit
+      document.getElementById('wpStatusGroup').style.display = 'block'
       document.getElementById('wastePointModal').classList.add('active')
     }
   } catch (err) {
@@ -623,40 +726,120 @@ async function handleEnvAnalysis(e) {
 
       // Icon cuaca dari OpenWeatherMap
       const weatherIcon = weather.icon
-        ? `<img src="https://openweathermap.org/img/wn/${weather.icon}@2x.png" alt="weather" style="width:50px;vertical-align:middle;">`
+        ? `https://openweathermap.org/img/wn/${weather.icon}@2x.png`
         : ''
 
+      // Tentukan background berdasarkan kondisi cuaca
+      const weatherBg = getWeatherBackground(weather.main)
+
+      // Format suhu dengan emoji
+      const tempEmoji = weather.temp > 30 ? '🔥' : weather.temp < 20 ? '❄️' : '🌡️'
+
       document.getElementById('envResultContent').innerHTML = `
-        <div class="env-result-grid">
-          <div class="env-section">
-            <h4>📍 Lokasi</h4>
-            <table class="env-table">
-              <tr><td><strong>Alamat</strong></td><td>${addr.display_name || '-'}</td></tr>
-              <tr><td><strong>Jalan</strong></td><td>${addr.road || '-'}</td></tr>
-              <tr><td><strong>Kelurahan</strong></td><td>${addr.village || addr.suburb || '-'}</td></tr>
-              <tr><td><strong>Kecamatan</strong></td><td>${addr.municipality || addr.county || '-'}</td></tr>
-              <tr><td><strong>Kota</strong></td><td>${addr.region || addr.city || '-'}</td></tr>
-              <tr><td><strong>Provinsi</strong></td><td>${addr.state || '-'}</td></tr>
-              <tr><td><strong>Negara</strong></td><td>${addr.country || '-'}</td></tr>
-              <tr><td><strong>Kode Pos</strong></td><td>${addr.postcode || '-'}</td></tr>
-            </table>
+        <div class="env-result-container">
+          <!-- Header dengan cuaca -->
+          <div class="env-weather-hero" style="background: ${weatherBg}">
+            <div class="weather-hero-content">
+              ${weatherIcon ? `<img src="${weatherIcon}" alt="weather" class="weather-icon-large">` : ''}
+              <div class="weather-hero-info">
+                <div class="weather-temp-large">${weather.temp ? weather.temp + '°C' : '-'}</div>
+                <div class="weather-desc-large">${weather.description || 'Tidak ada data'}</div>
+                <div class="weather-location-large">📍 ${addr.municipality || addr.county || addr.region || addr.city || 'Lokasi Tidak Diketahui'}</div>
+              </div>
+            </div>
+            <div class="weather-stats">
+              <div class="weather-stat-item">
+                <span class="stat-icon">💧</span>
+                <span class="stat-value">${weather.humidity || '-'}%</span>
+                <span class="env-stat-label">Kelembaban</span>
+              </div>
+              <div class="weather-stat-item">
+                <span class="stat-icon">💨</span>
+                <span class="stat-value">${weather.wind_speed || '-'} m/s</span>
+                <span class="env-stat-label">Angin</span>
+              </div>
+              <div class="weather-stat-item">
+                <span class="stat-icon">${tempEmoji}</span>
+                <span class="stat-value">${weather.feels_like || '-'}°C</span>
+                <span class="env-stat-label">Terasa</span>
+              </div>
+            </div>
           </div>
-          
-          <div class="env-section">
-            <h4>🌤️ Cuaca ${weatherIcon}</h4>
-            <table class="env-table">
-              <tr><td><strong>Kondisi</strong></td><td style="text-transform:capitalize;">${weather.description || '-'}</td></tr>
-              <tr><td><strong>Suhu</strong></td><td>${weather.temp ? weather.temp + '°C' : '-'}</td></tr>
-              <tr><td><strong>Terasa Seperti</strong></td><td>${weather.feels_like ? weather.feels_like + '°C' : '-'}</td></tr>
-              <tr><td><strong>Kelembaban</strong></td><td>${weather.humidity ? weather.humidity + '%' : '-'}</td></tr>
-              <tr><td><strong>Kecepatan Angin</strong></td><td>${weather.wind_speed ? weather.wind_speed + ' m/s' : '-'}</td></tr>
-            </table>
+
+          <!-- Grid Info -->
+          <div class="env-info-grid">
+            <!-- Lokasi Detail -->
+            <div class="env-info-card">
+              <div class="env-card-header">
+                <span class="env-card-icon">📍</span>
+                <h4>Detail Lokasi</h4>
+              </div>
+              <div class="env-card-body">
+                <div class="info-row">
+                  <span class="info-label">Alamat Lengkap</span>
+                  <span class="info-value">${addr.display_name || '-'}</span>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-grid-2col">
+                  <div class="info-item">
+                    <span class="info-label">🏘️ Kelurahan</span>
+                    <span class="info-value-sm">${addr.village || addr.suburb || '-'}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">🏛️ Kecamatan</span>
+                    <span class="info-value-sm">${addr.municipality || addr.county || '-'}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">🌆 Kota</span>
+                    <span class="info-value-sm">${addr.region || addr.city || '-'}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">🗺️ Provinsi</span>
+                    <span class="info-value-sm">${addr.state || '-'}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">🌏 Negara</span>
+                    <span class="info-value-sm">${addr.country || '-'}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">📮 Kode Pos</span>
+                    <span class="info-value-sm">${addr.postcode || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Koordinat -->
+            <div class="env-info-card coord-card">
+              <div class="env-card-header">
+                <span class="env-card-icon">🎯</span>
+                <h4>Koordinat GPS</h4>
+              </div>
+              <div class="env-card-body coord-body">
+                <div class="coord-display">
+                  <div class="coord-item">
+                    <span class="coord-label">LAT</span>
+                    <span class="coord-value">${parseFloat(data.lat).toFixed(6)}</span>
+                  </div>
+                  <div class="coord-separator">×</div>
+                  <div class="coord-item">
+                    <span class="coord-label">LON</span>
+                    <span class="coord-value">${parseFloat(data.lon).toFixed(8)}</span>
+                  </div>
+                </div>
+                <a href="https://www.google.com/maps?q=${data.lat},${data.lon}" target="_blank" class="btn btn-map">
+                  🗺️ Buka di Google Maps
+                </a>
+              </div>
+            </div>
           </div>
-          
-          <div class="env-section coordinates">
-            <h4>🗺️ Koordinat</h4>
-            <p><strong>Latitude:</strong> ${data.lat}</p>
-            <p><strong>Longitude:</strong> ${data.lon}</p>
+
+          <!-- Rekomendasi Lingkungan -->
+          <div class="env-recommendation">
+            <h4>💡 Rekomendasi Pengelolaan Limbah</h4>
+            <div class="recommendation-content">
+              ${getEnvironmentRecommendation(weather)}
+            </div>
           </div>
         </div>
       `
@@ -667,6 +850,79 @@ async function handleEnvAnalysis(e) {
   } finally {
     showLoading(false)
   }
+}
+
+function getWeatherBackground(weatherMain) {
+  const backgrounds = {
+    Clear: 'linear-gradient(135deg, #56CCF2 0%, #2F80ED 100%)',
+    Clouds: 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)',
+    Rain: 'linear-gradient(135deg, #373B44 0%, #4286f4 100%)',
+    Drizzle: 'linear-gradient(135deg, #89F7FE 0%, #66A6FF 100%)',
+    Thunderstorm: 'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
+    Snow: 'linear-gradient(135deg, #E6DADA 0%, #274046 100%)',
+    Mist: 'linear-gradient(135deg, #606c88 0%, #3f4c6b 100%)',
+    Fog: 'linear-gradient(135deg, #606c88 0%, #3f4c6b 100%)',
+    Haze: 'linear-gradient(135deg, #F2994A 0%, #F2C94C 100%)',
+  }
+  return backgrounds[weatherMain] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+}
+
+function getEnvironmentRecommendation(weather) {
+  let recommendations = []
+
+  if (weather.temp > 30) {
+    recommendations.push({
+      icon: '🌡️',
+      title: 'Suhu Tinggi',
+      desc: 'Hindari pengumpulan limbah organik di siang hari. Pastikan wadah tertutup rapat untuk mencegah bau.',
+    })
+  }
+
+  if (weather.humidity > 80) {
+    recommendations.push({
+      icon: '💧',
+      title: 'Kelembaban Tinggi',
+      desc: 'Pisahkan limbah basah dan kering. Gunakan wadah kedap air untuk mencegah rembesan.',
+    })
+  }
+
+  if (weather.main === 'Rain' || weather.main === 'Drizzle') {
+    recommendations.push({
+      icon: '🌧️',
+      title: 'Kondisi Hujan',
+      desc: 'Tutup area pengumpulan limbah. Pastikan drainase berfungsi baik untuk mencegah genangan.',
+    })
+  }
+
+  if (weather.wind_speed > 5) {
+    recommendations.push({
+      icon: '💨',
+      title: 'Angin Kencang',
+      desc: 'Amankan limbah ringan agar tidak berterbangan. Hindari pembakaran limbah.',
+    })
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push({
+      icon: '✅',
+      title: 'Kondisi Ideal',
+      desc: 'Cuaca mendukung untuk aktivitas pengelolaan limbah. Waktu yang tepat untuk pengumpulan dan pemilahan.',
+    })
+  }
+
+  return recommendations
+    .map(
+      (rec) => `
+    <div class="recommendation-item">
+      <span class="rec-icon">${rec.icon}</span>
+      <div class="rec-content">
+        <strong>${rec.title}</strong>
+        <p>${rec.desc}</p>
+      </div>
+    </div>
+  `
+    )
+    .join('')
 }
 
 function formatKey(key) {

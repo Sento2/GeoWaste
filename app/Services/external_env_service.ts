@@ -16,14 +16,16 @@ type WeatherResult = {
   icon: string
 }
 
-// ============ OPSI 1: Nominatim (OpenStreetMap) ============
-// Gratis tapi ada aturan ketat:
-// - User-Agent WAJIB valid dengan email asli
-// - Max 1 request per detik
+// ============ Nominatim (OpenStreetMap) ============
 // - Jangan bulk request
+// - Konfigurasi diambil dari .env
 async function getAddressFromNominatim(lat: number, lon: number): Promise<AddressResult> {
+  const baseUrl = process.env.NOMINATIM_BASE_URL || 'https://nominatim.openstreetmap.org'
+  const userAgent = process.env.NOMINATIM_USER_AGENT || 'GeoWaste-TubesAPI/1.0'
+  const email = process.env.NOMINATIM_EMAIL || 'contact@example.com'
+
   try {
-    const res = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+    const res = await axios.get(`${baseUrl}/reverse`, {
       params: {
         format: 'jsonv2',
         lat,
@@ -32,11 +34,10 @@ async function getAddressFromNominatim(lat: number, lon: number): Promise<Addres
         zoom: 18,
       },
       headers: {
-        // PENTING: Ganti dengan email asli kamu!
-        'User-Agent': 'GeoWaste-TubesAPI/1.0 (mohmagribi13@gmail.com)',
+        'User-Agent': `${userAgent} (${email})`,
         'Accept-Language': 'id',
       },
-      timeout: 10000, // 10 detik timeout
+      timeout: 10000,
     })
 
     return {
@@ -50,8 +51,7 @@ async function getAddressFromNominatim(lat: number, lon: number): Promise<Addres
   }
 }
 
-// ============ OPSI 2: OpenWeatherMap Geocoding (Backup) ============
-// Lebih reliable, pakai API key yang sama dengan weather
+// ============ OpenWeatherMap Geocoding (Backup) ============
 async function getAddressFromOpenWeather(lat: number, lon: number): Promise<AddressResult> {
   const apiKey = process.env.OPENWEATHER_API_KEY
   if (!apiKey) {
