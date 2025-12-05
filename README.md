@@ -1,133 +1,237 @@
-# 🌿 GeoWaste - Sistem Informasi Geografis Pengelolaan Limbah
+<div align="center">
 
-<p align="center">
-  <img src="https://img.shields.io/badge/AdonisJS-v6-5A45FF?style=for-the-badge&logo=adonisjs&logoColor=white" alt="AdonisJS">
-  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB">
-  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet">
-</p>
+# 🌿 GeoWaste
 
-<p align="center">
-  Aplikasi web untuk pengelolaan dan monitoring titik-titik limbah secara geografis dengan integrasi peta interaktif dan analisis lingkungan real-time.
-</p>
+### Sistem Informasi Geografis Pengelolaan Limbah
+
+<img src="./screenshots/Dashboard.png" alt="GeoWaste Dashboard" width="80%" style="border-radius: 10px; margin: 20px 0;">
+
+[![AdonisJS](https://img.shields.io/badge/AdonisJS-v6-5A45FF?style=for-the-badge&logo=adonisjs&logoColor=white)](https://adonisjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
+
+<br>
+
+**Aplikasi web modern untuk pengelolaan dan monitoring titik-titik limbah secara geografis**  
+**dengan integrasi peta interaktif dan analisis lingkungan real-time**
+
+<br>
+
+[🚀 Demo](#-instalasi) • [📖 Dokumentasi](#-api-documentation) • [🐛 Report Bug](https://github.com/Sento2/GeoWaste/issues)
+
+</div>
 
 ---
 
-## 📋 Daftar Isi
+## 📑 Daftar Isi
 
-- [Fitur](#-fitur)
+<details>
+<summary>Klik untuk melihat</summary>
+
+- [Tentang Project](#-tentang-project)
+- [Fitur Utama](#-fitur-utama)
 - [Tech Stack](#-tech-stack)
-- [Arsitektur](#-arsitektur)
+- [Arsitektur Sistem](#-arsitektur-sistem)
 - [Instalasi](#-instalasi)
 - [Konfigurasi](#-konfigurasi)
 - [API Documentation](#-api-documentation)
-- [Strategi Integrasi API Publik](#-strategi-integrasi-api-publik)
+- [Strategi Integrasi API](#-strategi-integrasi-api-publik)
 - [Screenshot](#-screenshot)
+- [Tema & Warna](#-tema--warna)
 - [Kontributor](#-kontributor)
+
+</details>
 
 ---
 
-## ✨ Fitur
+## 🎯 Tentang Project
+
+**GeoWaste** adalah aplikasi web yang dirancang untuk membantu pengelolaan limbah berbasis lokasi geografis. Dengan memanfaatkan teknologi peta interaktif dan integrasi API cuaca, aplikasi ini memungkinkan:
+
+- 📍 **Pemetaan** titik-titik limbah secara real-time
+- 📊 **Monitoring** status penanganan limbah
+- 🌡️ **Analisis** kondisi lingkungan untuk optimasi pengelolaan
+- 👥 **Kolaborasi** antara admin, petugas, dan warga
+
+---
+
+## ✨ Fitur Utama
+
+<table>
+<tr>
+<td width="50%">
 
 ### 🗺️ Peta Interaktif
+- Visualisasi dengan **Leaflet.js**
+- Marker berwarna berdasarkan status
+- Popup informasi detail
+- Filter berdasarkan jenis & status
 
-- Visualisasi titik limbah menggunakan **Leaflet.js**
-- Marker berwarna berdasarkan status (Baru, Ditinjau, Selesai)
-- Popup informasi detail untuk setiap titik
+</td>
+<td width="50%">
 
 ### 📍 Manajemen Titik Limbah
-
-- CRUD titik limbah dengan koordinat presisi tinggi
-- Kategorisasi jenis limbah (Organik, Anorganik, B3, Campuran)
+- CRUD dengan koordinat presisi tinggi
+- Kategorisasi: Organik, Anorganik, B3, Campuran
 - Tracking status penanganan
+- Riwayat perubahan
 
-### 📊 Laporan & Monitoring
+</td>
+</tr>
+<tr>
+<td width="50%">
 
-- Sistem pelaporan dari warga
-- Dashboard statistik real-time
-- Filter dan pencarian data
+### 📊 Dashboard & Laporan
+- Statistik real-time
+- Grafik status penanganan
+- Sistem pelaporan warga
+- Filter & pencarian data
+
+</td>
+<td width="50%">
 
 ### 🌡️ Analisis Lingkungan
+- Data cuaca **OpenWeatherMap**
+- Reverse geocoding **Nominatim**
+- Rekomendasi pengelolaan
+- Alert kondisi ekstrem
 
-- Integrasi **OpenWeatherMap API** untuk data cuaca real-time
-- Integrasi **Nominatim API** untuk reverse geocoding
-- Rekomendasi berdasarkan kondisi cuaca
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 👥 Multi-Role Access
+- **Admin**: Akses penuh
+- **Petugas**: Kelola data
+- **Warga**: Buat laporan
 
-- **Admin**: Akses penuh ke semua fitur
-- **Petugas**: Kelola titik limbah dan laporan
-- **Warga**: Buat laporan dan lihat informasi
+</td>
+<td width="50%">
 
 ### 🔐 Keamanan
-
 - Autentikasi JWT
 - Role-based authorization
-- Password hashing dengan bcrypt
+- Password hashing bcrypt
+- Session management
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend
+<div align="center">
 
-| Teknologi       | Deskripsi                           |
-| --------------- | ----------------------------------- |
-| **AdonisJS v6** | Framework Node.js dengan TypeScript |
-| **MongoDB**     | Database NoSQL dengan Mongoose ODM  |
-| **JWT**         | JSON Web Token untuk autentikasi    |
-| **Axios**       | HTTP client untuk external API      |
+### Backend
+| | Teknologi | Deskripsi |
+|:--:|:--|:--|
+| <img src="https://img.shields.io/badge/-AdonisJS-5A45FF?style=flat-square&logo=adonisjs&logoColor=white" /> | **AdonisJS v6** | Full-stack MVC Framework |
+| <img src="https://img.shields.io/badge/-MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" /> | **MongoDB** | NoSQL Database + Mongoose |
+| <img src="https://img.shields.io/badge/-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" /> | **JWT** | Token-based Authentication |
+| <img src="https://img.shields.io/badge/-Axios-5A29E4?style=flat-square&logo=axios&logoColor=white" /> | **Axios** | HTTP Client |
 
 ### Frontend
-
-| Teknologi      | Deskripsi                         |
-| -------------- | --------------------------------- |
-| **Vanilla JS** | JavaScript murni tanpa framework  |
-| **Leaflet.js** | Library peta interaktif           |
-| **CSS3**       | Styling dengan tema Nature/Forest |
+| | Teknologi | Deskripsi |
+|:--:|:--|:--|
+| <img src="https://img.shields.io/badge/-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" /> | **Vanilla JS** | Pure JavaScript |
+| <img src="https://img.shields.io/badge/-Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white" /> | **Leaflet.js** | Interactive Maps |
+| <img src="https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" /> | **CSS3** | Modern Styling |
 
 ### External APIs
+| | API | Fungsi |
+|:--:|:--|:--|
+| 🌤️ | **OpenWeatherMap** | Real-time Weather Data |
+| 🗺️ | **Nominatim OSM** | Reverse Geocoding |
 
-| API                 | Fungsi                                |
-| ------------------- | ------------------------------------- |
-| **OpenWeatherMap**  | Data cuaca real-time                  |
-| **Nominatim (OSM)** | Reverse geocoding koordinat ke alamat |
+</div>
 
 ---
 
-## 🏗️ Arsitektur
+## 🏗️ Arsitektur Sistem
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │   Browser   │  │  Leaflet.js │  │   CSS3      │              │
+│  │  (app.html) │  │    (Maps)   │  │  (Styling)  │              │
+│  └──────┬──────┘  └──────┬──────┘  └─────────────┘              │
+│         │                │                                       │
+│         └────────┬───────┘                                       │
+│                  │ HTTP/REST                                     │
+└──────────────────┼───────────────────────────────────────────────┘
+                   │
+┌──────────────────┼───────────────────────────────────────────────┐
+│                  ▼           SERVER LAYER                        │
+│  ┌─────────────────────────────────────────────────────────┐     │
+│  │                    AdonisJS v6                          │     │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │     │
+│  │  │   Routes    │─▶│ Controllers │─▶│  Services   │      │     │
+│  │  └─────────────┘  └─────────────┘  └──────┬──────┘      │     │
+│  │                          │                │              │     │
+│  │  ┌─────────────┐  ┌──────┴──────┐  ┌──────┴──────┐      │     │
+│  │  │ Middleware  │  │   Models    │  │ External    │      │     │
+│  │  │ (Auth/Role) │  │ (Mongoose)  │  │ API Service │      │     │
+│  │  └─────────────┘  └──────┬──────┘  └──────┬──────┘      │     │
+│  └───────────────────────────┼───────────────┼──────────────┘     │
+│                              │               │                    │
+└──────────────────────────────┼───────────────┼────────────────────┘
+                               │               │
+          ┌────────────────────┘               └────────────────┐
+          │                                                     │
+          ▼                                                     ▼
+┌──────────────────┐                           ┌────────────────────────┐
+│   MongoDB Atlas  │                           │    External APIs       │
+│  ┌────────────┐  │                           │  ┌──────────────────┐  │
+│  │   Users    │  │                           │  │  OpenWeatherMap  │  │
+│  ├────────────┤  │                           │  ├──────────────────┤  │
+│  │WastePoints │  │                           │  │    Nominatim     │  │
+│  ├────────────┤  │                           │  └──────────────────┘  │
+│  │  Reports   │  │                           │                        │
+│  └────────────┘  │                           └────────────────────────┘
+└──────────────────┘
+```
+
+### 📁 Struktur Project
 
 ```
 GeoWaste/
-├── app/
-│   ├── controllers/          # Request handlers
-│   │   ├── AuthController.ts
-│   │   ├── ExternalController.ts
-│   │   ├── ReportsController.ts
-│   │   ├── WastePointsController.ts
-│   │   └── users_controller.ts
-│   ├── middleware/           # Auth & role middleware
-│   │   ├── Auth.ts
-│   │   └── Role.ts
-│   ├── models/               # Mongoose schemas
+├── 📂 app/
+│   ├── 📂 controllers/          # Request Handlers
+│   │   ├── AuthController.ts        # Login, Register, Profile
+│   │   ├── ExternalController.ts    # Weather & Geocoding
+│   │   ├── ReportsController.ts     # CRUD Laporan
+│   │   ├── WastePointsController.ts # CRUD Titik Limbah
+│   │   └── users_controller.ts      # Manajemen User
+│   ├── 📂 middleware/           # Auth & Authorization
+│   │   ├── Auth.ts                  # JWT Verification
+│   │   └── Role.ts                  # Role-based Access
+│   ├── 📂 models/               # Mongoose Schemas
 │   │   ├── Report.ts
 │   │   ├── users.ts
 │   │   └── WastePoint.ts
-│   └── Services/             # External API services
-│       └── ExternalEnvService.ts
-├── config/                   # App configurations
-│   └── Mongo.ts
-├── public/                   # Frontend assets
-│   ├── app.html              # Main HTML
-│   ├── app.js                # Frontend logic
-│   ├── style.css             # Styling
-│   ├── docs.html             # API documentation UI
-│   └── swagger.json          # OpenAPI specification
-├── start/
-│   ├── routes.ts             # API routes
-│   └── env.ts                # Environment validation
-└── .env                      # Environment variables
+│   └── 📂 Services/             # Business Logic
+│       └── ExternalEnvService.ts    # External API Calls
+├── 📂 config/                   # App Configuration
+│   └── Mongo.ts                     # Database Connection
+├── 📂 public/                   # Static Assets
+│   ├── app.html                     # Main Frontend
+│   ├── app.js                       # Frontend Logic
+│   ├── style.css                    # Styling
+│   ├── docs.html                    # Swagger UI
+│   └── swagger.json                 # API Specification
+├── 📂 screenshots/              # App Screenshots
+├── 📂 start/
+│   ├── routes.ts                    # API Routes Definition
+│   └── env.ts                       # Environment Validation
+├── .env                         # Environment Variables
+├── .env.example                 # Environment Template
+└── package.json                 # Dependencies
 ```
 
 ---
@@ -136,71 +240,44 @@ GeoWaste/
 
 ### Prasyarat
 
-- Node.js v18+
-- MongoDB (local atau Atlas)
-- npm atau yarn
+| Requirement | Version |
+|-------------|---------|
+| Node.js | v18.0+ |
+| MongoDB | v6.0+ atau Atlas |
+| npm/yarn | Latest |
 
-### Langkah-langkah
+### Quick Start
 
-1. **Clone repository**
+```bash
+# 1️⃣ Clone repository
+git clone https://github.com/Sento2/GeoWaste.git
+cd GeoWaste
 
-   ```bash
-   git clone https://github.com/Sento2/GeoWaste.git
-   cd GeoWaste
-   ```
+# 2️⃣ Install dependencies
+npm install
 
-2. **Install dependencies**
+# 3️⃣ Setup environment
+cp .env.example .env
 
-   ```bash
-   npm install
-   ```
+# 4️⃣ Configure .env (lihat bagian Konfigurasi)
 
-3. **Setup environment**
+# 5️⃣ Run development server
+npm run dev
 
-   ```bash
-   cp .env.example .env
-   ```
+# 6️⃣ Buka browser
+# Frontend: http://localhost:3333/app.html
+# API Docs: http://localhost:3333/docs.html
+```
 
-4. **Konfigurasi `.env`**
+### Production Build
 
-   ```env
-   # App
-   TZ=UTC
-   PORT=3333
-   HOST=localhost
-   LOG_LEVEL=info
-   APP_KEY=your-random-app-key
-   NODE_ENV=development
+```bash
+# Build untuk production
+npm run build
 
-   # MongoDB
-   MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/geowaste
-
-   # JWT
-   JWT_SECRET=your-jwt-secret-key
-
-   # OpenWeatherMap
-   OPENWEATHER_API_KEY=your-openweather-api-key
-
-   # Nominatim
-   NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
-   NOMINATIM_USER_AGENT=GeoWaste/1.0
-   NOMINATIM_EMAIL=your-email@example.com
-   ```
-
-5. **Jalankan aplikasi**
-
-   ```bash
-   # Development mode
-   npm run dev
-
-   # Production mode
-   npm run build
-   npm start
-   ```
-
-6. **Akses aplikasi**
-   - Frontend: `http://localhost:3333/app.html`
-   - API Docs: `http://localhost:3333/docs.html`
+# Jalankan production server
+npm start
+```
 
 ---
 
@@ -208,23 +285,52 @@ GeoWaste/
 
 ### Environment Variables
 
-| Variable               | Deskripsi                  | Required |
-| ---------------------- | -------------------------- | -------- |
-| `PORT`                 | Port server                | Ya       |
-| `MONGO_URI`            | MongoDB connection string  | Ya       |
-| `JWT_SECRET`           | Secret key untuk JWT       | Ya       |
-| `OPENWEATHER_API_KEY`  | API key OpenWeatherMap     | Ya       |
-| `NOMINATIM_BASE_URL`   | Base URL Nominatim API     | Ya       |
-| `NOMINATIM_USER_AGENT` | User agent untuk Nominatim | Ya       |
-| `NOMINATIM_EMAIL`      | Email untuk Nominatim      | Ya       |
+Buat file `.env` dengan konfigurasi berikut:
+
+```env
+# ═══════════════════════════════════════
+# 🔧 APP CONFIGURATION
+# ═══════════════════════════════════════
+TZ=UTC
+PORT=3333
+HOST=localhost
+LOG_LEVEL=info
+APP_KEY=your-random-32-character-key
+NODE_ENV=development
+
+# ═══════════════════════════════════════
+# 🗄️ DATABASE (MongoDB)
+# ═══════════════════════════════════════
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/geowaste
+
+# ═══════════════════════════════════════
+# 🔐 AUTHENTICATION (JWT)
+# ═══════════════════════════════════════
+JWT_SECRET=your-super-secret-jwt-key
+
+# ═══════════════════════════════════════
+# 🌤️ OPENWEATHERMAP API
+# ═══════════════════════════════════════
+OPENWEATHER_API_KEY=your-openweather-api-key
+
+# ═══════════════════════════════════════
+# 🗺️ NOMINATIM API (OpenStreetMap)
+# ═══════════════════════════════════════
+NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
+NOMINATIM_USER_AGENT=GeoWaste/1.0 (your-email@example.com)
+NOMINATIM_EMAIL=your-email@example.com
+```
 
 ### Default Admin Account
 
-Setelah instalasi, buat admin pertama via API atau MongoDB:
+Setelah instalasi, buat admin pertama via API:
 
-```json
+```bash
+POST /api/auth/register
+Content-Type: application/json
+
 {
-  "name": "Admin",
+  "name": "Administrator",
   "email": "admin@geowaste.com",
   "password": "admin123",
   "role": "admin"
@@ -236,309 +342,251 @@ Setelah instalasi, buat admin pertama via API atau MongoDB:
 ## 📚 API Documentation
 
 ### Base URL
-
 ```
 http://localhost:3333/api
 ```
 
-### Endpoints
+### 🔐 Authentication
 
-#### Authentication
+| Method | Endpoint | Description | Auth |
+|:------:|:---------|:------------|:----:|
+| `POST` | `/auth/register` | Registrasi user baru | ❌ |
+| `POST` | `/auth/login` | Login & get token | ❌ |
+| `GET` | `/auth/me` | Get current user info | ✅ |
 
-| Method | Endpoint             | Deskripsi                |
-| ------ | -------------------- | ------------------------ |
-| POST   | `/api/auth/register` | Registrasi user baru     |
-| POST   | `/api/auth/login`    | Login dan dapatkan token |
-| GET    | `/api/auth/me`       | Info user yang login     |
+### 📍 Waste Points
 
-#### Waste Points
+| Method | Endpoint | Description | Auth | Role |
+|:------:|:---------|:------------|:----:|:----:|
+| `GET` | `/waste-points` | List semua titik | ✅ | All |
+| `POST` | `/waste-points` | Tambah titik baru | ✅ | Admin, Petugas |
+| `GET` | `/waste-points/:id` | Detail titik | ✅ | All |
+| `PUT` | `/waste-points/:id` | Update titik | ✅ | Admin, Petugas |
+| `DELETE` | `/waste-points/:id` | Hapus titik | ✅ | Admin |
 
-| Method | Endpoint                | Deskripsi               |
-| ------ | ----------------------- | ----------------------- |
-| GET    | `/api/waste-points`     | List semua titik limbah |
-| POST   | `/api/waste-points`     | Tambah titik baru       |
-| GET    | `/api/waste-points/:id` | Detail titik limbah     |
-| PUT    | `/api/waste-points/:id` | Update titik limbah     |
-| DELETE | `/api/waste-points/:id` | Hapus titik limbah      |
+### 📋 Reports
 
-#### Reports
+| Method | Endpoint | Description | Auth | Role |
+|:------:|:---------|:------------|:----:|:----:|
+| `GET` | `/reports` | List semua laporan | ✅ | Admin, Petugas |
+| `POST` | `/reports` | Buat laporan | ✅ | All |
+| `PATCH` | `/reports/:id/status` | Update status | ✅ | Admin, Petugas |
 
-| Method | Endpoint                  | Deskripsi             |
-| ------ | ------------------------- | --------------------- |
-| GET    | `/api/reports`            | List semua laporan    |
-| POST   | `/api/reports`            | Buat laporan baru     |
-| PATCH  | `/api/reports/:id/status` | Update status laporan |
+### 👥 Users
 
-#### Users (Admin only)
+| Method | Endpoint | Description | Auth | Role |
+|:------:|:---------|:------------|:----:|:----:|
+| `GET` | `/users` | List semua user | ✅ | Admin |
+| `PUT` | `/users/:id` | Update user | ✅ | Admin |
+| `DELETE` | `/users/:id` | Hapus user | ✅ | Admin |
 
-| Method | Endpoint         | Deskripsi       |
-| ------ | ---------------- | --------------- |
-| GET    | `/api/users`     | List semua user |
-| PUT    | `/api/users/:id` | Update user     |
-| DELETE | `/api/users/:id` | Hapus user      |
+### 🌍 External APIs
 
-#### External APIs
+| Method | Endpoint | Description | Auth |
+|:------:|:---------|:------------|:----:|
+| `GET` | `/external/weather` | Data cuaca | ✅ |
+| `GET` | `/external/reverse-geocode` | Koordinat → Alamat | ✅ |
+| `GET` | `/external/environment` | Cuaca + Alamat + Rekomendasi | ✅ |
 
-| Method | Endpoint                        | Deskripsi           |
-| ------ | ------------------------------- | ------------------- |
-| GET    | `/api/external/reverse-geocode` | Reverse geocoding   |
-| GET    | `/api/external/weather`         | Data cuaca          |
-| GET    | `/api/external/environment`     | Analisis lingkungan |
+<br>
 
-📖 **Dokumentasi lengkap**: Buka `/docs.html` untuk Swagger UI
+> 📖 **Dokumentasi Lengkap**: Buka `/docs.html` untuk Swagger UI interaktif
 
 ---
 
 ## 🔗 Strategi Integrasi API Publik
 
-### Arsitektur Integrasi
+### Arsitektur Proxy Pattern
 
 ```
-┌─────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│   Frontend  │────▶│  Backend API    │────▶│  External APIs   │
-│  (app.js)   │     │  (AdonisJS)     │     │  (Weather/Geo)   │
-└─────────────┘     └─────────────────┘     └──────────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │             │
-              ExternalController  ExternalEnvService
+┌──────────┐      ┌──────────────┐      ┌─────────────────┐
+│ Frontend │ ───▶ │   Backend    │ ───▶ │  External APIs  │
+│          │      │   (Proxy)    │      │                 │
+└──────────┘      └──────────────┘      └─────────────────┘
+                         │
+            ┌────────────┴────────────┐
+            │                         │
+     API Key tersembunyi      Response di-transform
 ```
 
-### Mengapa Menggunakan Backend sebagai Proxy?
+### Mengapa Backend sebagai Proxy?
 
-| Alasan               | Penjelasan                                            |
-| -------------------- | ----------------------------------------------------- |
-| 🔐 **Keamanan**      | API key tidak terekspos di frontend/browser           |
-| 🚦 **Rate Limiting** | Request bisa dikontrol dan dibatasi di server         |
-| 📊 **Caching**       | Response bisa di-cache untuk efisiensi                |
-| 🔄 **Transformasi**  | Data bisa diproses/digabung sebelum dikirim ke client |
-
-### API yang Diintegrasikan
-
-#### 1. OpenWeatherMap API
-
-- **Fungsi**: Mendapatkan data cuaca real-time berdasarkan koordinat
-- **Endpoint**: `api.openweathermap.org/data/2.5/weather`
-- **Data yang diambil**: Suhu, kelembaban, kecepatan angin, deskripsi cuaca
-
-#### 2. Nominatim API (OpenStreetMap)
-
-- **Fungsi**: Reverse geocoding (mengubah koordinat menjadi alamat)
-- **Endpoint**: `nominatim.openstreetmap.org/reverse`
-- **Data yang diambil**: Alamat lengkap (jalan, kelurahan, kota, provinsi)
+| Benefit | Penjelasan |
+|:--------|:-----------|
+| 🔐 **Security** | API key tidak terekspos di browser |
+| 🚦 **Rate Control** | Request bisa dibatasi di server |
+| 📊 **Caching** | Response bisa di-cache |
+| 🔄 **Transform** | Data diproses sebelum ke client |
 
 ### Flow Integrasi
 
 ```
-1. User membuka halaman "Analisis Lingkungan"
-                    │
-                    ▼
-2. Frontend meminta lokasi user (navigator.geolocation)
-                    │
-                    ▼
-3. Frontend mengirim request ke Backend
-   GET /api/external/environment?lat=-6.2&lon=106.8
-                    │
-                    ▼
-4. Backend (ExternalController) menerima request
-                    │
-                    ▼
-5. Backend memanggil External APIs secara paralel:
-   ├── OpenWeatherMap → Data cuaca
-   └── Nominatim → Data alamat
-                    │
-                    ▼
-6. Backend menggabungkan & mentransformasi response
-                    │
-                    ▼
-7. Frontend menerima data & merender UI
-   - Weather hero card dengan kondisi cuaca
-   - Detail lokasi dari reverse geocoding
-   - Rekomendasi pengelolaan limbah
+User Action          Frontend              Backend               External API
+     │                   │                    │                       │
+     │ Open Environment  │                    │                       │
+     │──────────────────▶│                    │                       │
+     │                   │ GET /environment   │                       │
+     │                   │───────────────────▶│                       │
+     │                   │                    │ GET Weather           │
+     │                   │                    │──────────────────────▶│
+     │                   │                    │◀──────────────────────│
+     │                   │                    │ GET Geocode           │
+     │                   │                    │──────────────────────▶│
+     │                   │                    │◀──────────────────────│
+     │                   │   Combined Data    │                       │
+     │                   │◀───────────────────│                       │
+     │   Render UI       │                    │                       │
+     │◀──────────────────│                    │                       │
 ```
 
-### Implementasi Kode
+### API yang Diintegrasikan
 
-#### Service Layer (`ExternalEnvService.ts`)
+<table>
+<tr>
+<td width="50%">
 
-```typescript
-import axios from 'axios'
+#### 🌤️ OpenWeatherMap
+```
+Endpoint: api.openweathermap.org/data/2.5/weather
+Method: GET
+Params: lat, lon, appid, units
 
-// Fungsi untuk mengambil data cuaca
-export async function getWeather(lat: number, lon: number) {
-  const apiKey = process.env.OPENWEATHER_API_KEY
-  const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
-    params: {
-      lat,
-      lon,
-      appid: apiKey,
-      units: 'metric',
-      lang: 'id',
-    },
-  })
-  return {
-    temp: response.data.main.temp,
-    humidity: response.data.main.humidity,
-    wind_speed: response.data.wind.speed,
-    description: response.data.weather[0].description,
-    icon: response.data.weather[0].icon,
-  }
-}
-
-// Fungsi untuk reverse geocoding
-export async function reverseGeocode(lat: number, lon: number) {
-  const response = await axios.get(`${process.env.NOMINATIM_BASE_URL}/reverse`, {
-    params: {
-      lat,
-      lon,
-      format: 'json',
-    },
-    headers: {
-      'User-Agent': process.env.NOMINATIM_USER_AGENT,
-    },
-  })
-  return response.data.address
-}
+Response:
+├── temp (suhu)
+├── humidity (kelembaban)
+├── wind_speed (angin)
+└── description (kondisi)
 ```
 
-#### Controller Layer (`ExternalController.ts`)
+</td>
+<td width="50%">
 
-```typescript
-import { HttpContext } from '@adonisjs/core/http'
-import { getWeather, reverseGeocode } from '#services/ExternalEnvService'
+#### 🗺️ Nominatim
+```
+Endpoint: nominatim.openstreetmap.org/reverse
+Method: GET
+Params: lat, lon, format
+Headers: User-Agent (required)
 
-export default class ExternalController {
-  // Endpoint gabungan untuk analisis lingkungan
-  async environment({ request, response }: HttpContext) {
-    const { lat, lon } = request.qs()
-
-    try {
-      // Panggil kedua API secara paralel untuk efisiensi
-      const [weather, address] = await Promise.all([
-        getWeather(parseFloat(lat), parseFloat(lon)),
-        reverseGeocode(parseFloat(lat), parseFloat(lon)),
-      ])
-
-      return response.json({
-        success: true,
-        data: { weather, address },
-      })
-    } catch (error) {
-      return response.status(503).json({
-        success: false,
-        message: 'Gagal mengambil data dari external API',
-      })
-    }
-  }
-}
+Response:
+├── road (jalan)
+├── village (kelurahan)
+├── city (kota)
+└── state (provinsi)
 ```
 
-### Best Practices yang Diterapkan
-
-| Practice                     | Implementasi                                            |
-| ---------------------------- | ------------------------------------------------------- |
-| ✅ **Proxy Pattern**         | API dipanggil via backend, bukan langsung dari frontend |
-| ✅ **Environment Variables** | API key disimpan di `.env`, tidak di-hardcode           |
-| ✅ **Parallel Requests**     | `Promise.all()` untuk memanggil multiple API sekaligus  |
-| ✅ **Error Handling**        | Try-catch dengan response yang informatif               |
-| ✅ **User-Agent Header**     | Nominatim membutuhkan identifikasi aplikasi             |
-| ✅ **Data Transformation**   | Response di-transform sesuai kebutuhan frontend         |
-
-### Konfigurasi API Keys
-
-```env
-# OpenWeatherMap - Daftar di https://openweathermap.org/api
-OPENWEATHER_API_KEY=your-api-key-here
-
-# Nominatim - Gratis, tapi butuh identifikasi
-NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
-NOMINATIM_USER_AGENT=GeoWaste/1.0 (your-email@example.com)
-NOMINATIM_EMAIL=your-email@example.com
-```
+</td>
+</tr>
+</table>
 
 ### Rate Limits
 
-| API                | Limit                       | Catatan                |
-| ------------------ | --------------------------- | ---------------------- |
-| **OpenWeatherMap** | 60 calls/minute (free tier) | Butuh API key          |
-| **Nominatim**      | 1 request/second            | Wajib pakai User-Agent |
+| API | Free Tier Limit | Catatan |
+|:----|:----------------|:--------|
+| OpenWeatherMap | 60 calls/min | Butuh API key |
+| Nominatim | 1 req/sec | Wajib User-Agent |
 
 ---
 
 ## 📸 Screenshot
 
+<div align="center">
+
 ### 🏠 Dashboard
+<img src="./screenshots/Dashboard.png" alt="Dashboard" width="90%" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-<p align="center">
-  <img src="./screenshots/Dashboard.png" alt="Dashboard" width="100%">
-</p>
-
-_Dashboard dengan statistik real-time, grafik status penanganan limbah, dan laporan terbaru._
+<br><br>
 
 ### 🗺️ Peta Interaktif
+<img src="./screenshots/Map.png" alt="Peta Interaktif" width="90%" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-<p align="center">
-  <img src="./screenshots/Map.png" alt="Peta Interaktif" width="100%">
-</p>
-
-_Visualisasi titik limbah dengan marker berwarna berdasarkan status dan popup informasi detail._
+<br><br>
 
 ### 🌡️ Analisis Lingkungan
+<img src="./screenshots/Analisis Lingkungan.png" alt="Analisis Lingkungan" width="90%" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
-<p align="center">
-  <img src="./screenshots/Analisis Lingkungan.png" alt="Analisis Lingkungan" width="100%">
-</p>
-
-_Informasi cuaca real-time dan rekomendasi pengelolaan limbah berdasarkan kondisi lingkungan._
+</div>
 
 ---
 
-## 🎨 Tema Warna
+## 🎨 Tema & Warna
 
-Aplikasi menggunakan tema **Nature/Forest** dengan palette:
+Aplikasi menggunakan tema **Nature/Forest** yang menenangkan:
 
-| Warna           | Hex       | Penggunaan |
-| --------------- | --------- | ---------- |
-| 🌲 Forest Green | `#2d6a4f` | Primary    |
-| 🌿 Sage Green   | `#52796f` | Secondary  |
-| 🟤 Earth Brown  | `#8b7355` | Accent     |
-| 🌊 Sky Blue     | `#74c0fc` | Info       |
-| 🍃 Leaf Green   | `#69db7c` | Success    |
+<div align="center">
+
+| Preview | Nama | Hex Code | Penggunaan |
+|:-------:|:-----|:---------|:-----------|
+| ![#2d6a4f](https://via.placeholder.com/30/2d6a4f/2d6a4f?text=+) | **Forest Green** | `#2d6a4f` | Primary, Buttons |
+| ![#52796f](https://via.placeholder.com/30/52796f/52796f?text=+) | **Sage Green** | `#52796f` | Secondary, Headers |
+| ![#8b7355](https://via.placeholder.com/30/8b7355/8b7355?text=+) | **Earth Brown** | `#8b7355` | Accent, Borders |
+| ![#74c0fc](https://via.placeholder.com/30/74c0fc/74c0fc?text=+) | **Sky Blue** | `#74c0fc` | Info, Links |
+| ![#69db7c](https://via.placeholder.com/30/69db7c/69db7c?text=+) | **Leaf Green** | `#69db7c` | Success, Completed |
+
+</div>
 
 ---
 
 ## 👥 Kontributor
 
+<div align="center">
 <table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/Sento2">
-        <img src="https://github.com/Sento2.png" width="100px;" alt=""/>
-        <br />
-        <sub><b>Sento2</b></sub>
-      </a>
-    </td>
-  </tr>
+<tr>
+<td align="center">
+<a href="https://github.com/Sento2">
+<img src="https://github.com/Sento2.png" width="120px;" style="border-radius: 50%;" alt="Sento2"/>
+<br />
+<sub><b>Sento2</b></sub>
+</a>
+<br />
+<sub>💻 Developer</sub>
+</td>
+</tr>
 </table>
+</div>
 
 ---
 
 ## 📄 Lisensi
 
+<div align="center">
+
 Project ini dibuat untuk keperluan **Tugas Besar** mata kuliah.
+
+[![License](https://img.shields.io/badge/License-Educational-green?style=for-the-badge)](LICENSE)
+
+</div>
 
 ---
 
 ## 🙏 Acknowledgments
 
-- [AdonisJS](https://adonisjs.com/) - The Node.js Framework
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Leaflet](https://leafletjs.com/) - Interactive Maps
-- [OpenWeatherMap](https://openweathermap.org/) - Weather API
-- [OpenStreetMap/Nominatim](https://nominatim.org/) - Geocoding
+<div align="center">
+
+Terima kasih kepada teknologi dan layanan berikut:
+
+[![AdonisJS](https://img.shields.io/badge/AdonisJS-5A45FF?style=flat-square&logo=adonisjs&logoColor=white)](https://adonisjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com/)
+[![OpenWeatherMap](https://img.shields.io/badge/OpenWeatherMap-EB6E4B?style=flat-square&logo=openweathermap&logoColor=white)](https://openweathermap.org/)
+[![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=flat-square&logo=openstreetmap&logoColor=white)](https://www.openstreetmap.org/)
+
+</div>
 
 ---
 
-<p align="center">
-  Made with 💚 for a greener environment
-</p>
+<div align="center">
+
+### 🌿 GeoWaste
+
+**Bersama Menjaga Lingkungan**
+
+<br>
+
+Made with 💚 for a greener environment
+
+<br>
+
+⭐ Star this repo jika bermanfaat!
+
+</div>
