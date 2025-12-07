@@ -815,6 +815,531 @@ async function reverseGeocodeWithDelay(lat: number, lon: number) {
 
 ---
 
+## 🔐 Penerapan Mekanisme Keamanan API
+
+### 📌 Overview Keamanan
+
+GeoWaste menerapkan **multiple layers of security** untuk melindungi API dari akses tidak sah dan serangan berbahaya:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SECURITY LAYERS                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   🌐 Request Masuk                                                          │
+│         │                                                                   │
+│         ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │    CORS     │ ◄── Layer 1: Hanya izinkan origin tertentu               │
+│   └──────┬──────┘                                                           │
+│          │                                                                   │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │   JWT Auth  │ ◄── Layer 2: Verifikasi token autentikasi                │
+│   └──────┬──────┘                                                           │
+│          │                                                                   │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │ Role Check  │ ◄── Layer 3: Periksa hak akses berdasarkan role          │
+│   └──────┬──────┘                                                           │
+│          │                                                                   │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │  Validate   │ ◄── Layer 4: Validasi input data                         │
+│   └──────┬──────┘                                                           │
+│          │                                                                   │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │ Controller  │ ◄── Proses request yang sudah terverifikasi              │
+│   └─────────────┘                                                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🛡️ Mekanisme Keamanan yang Diterapkan
+
+#### 1️⃣ JWT Authentication (JSON Web Token)
+
+**Apa itu JWT?**
+JWT adalah standar terbuka (RFC 7519) untuk mentransmisikan informasi secara aman antar pihak sebagai objek JSON yang di-sign secara digital.
+
+**Struktur JWT:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        JWT TOKEN                            │
+├─────────────────────────────────────────────────────────────┤
+│  HEADER      │    PAYLOAD       │      SIGNATURE            │
+│  (Algorithm) │    (Data User)   │      (Verification)       │
+├──────────────┼──────────────────┼───────────────────────────┤
+│  {           │  {               │                           │
+│   "alg":     │   "userId": "x", │   HMACSHA256(             │
+│    "HS256",  │   "email": "y",  │     base64(header) + "."  │
+│   "typ":     │   "role": "z",   │     + base64(payload),    │
+│    "JWT"     │   "exp": 123456  │     secret                │
+│  }           │  }               │   )                       │
+└──────────────┴──────────────────┴───────────────────────────┘
+         │              │                    │
+         └──────────────┴────────────────────┘
+                        │
+                  xxxxx.yyyyy.zzzzz
+                  (Base64 encoded)
+```
+
+**Implementasi di GeoWaste:**
+
+```typescript
+// app/middleware/Auth.ts
+import jwt from 'jsonwebtoken'
+import type { HttpContext } from '@adonisjs/core/http'
+import type { NextFn } from '@adonisjs/core/types/http'
+import User from '#models/users'
+
+export default class AuthMiddleware {
+  async handle(ctx: HttpContext, next: NextFn) {
+    const { request, response } = ctx
+
+    // 1. Ambil token dari header Authorization
+    const authHeader = request.header('Authorization')
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return response.unauthorized({
+        success: false,
+        message: 'Token tidak ditemukan',
+      })
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    try {
+      // 2. Verifikasi token dengan secret key
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        userId: string
+        email: string
+        role: string
+      }
+
+      // 3. Cari user di database
+      const user = await User.findById(decoded.userId)
+
+      if (!user) {
+        return response.unauthorized({
+          success: false,
+          message: 'User tidak ditemukan',
+        })
+      }
+
+      // 4. Attach user ke context untuk digunakan di controller
+      ctx.user = user
+
+      // 5. Lanjut ke middleware/controller berikutnya
+      await next()
+    } catch (error) {
+      return response.unauthorized({
+        success: false,
+        message: 'Token tidak valid atau sudah expired',
+      })
+    }
+  }
+}
+```
+
+**Flow Autentikasi:**
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        AUTHENTICATION FLOW                               │
+└──────────────────────────────────────────────────────────────────────────┘
+
+  📱 CLIENT                                              🖥️ SERVER
+      │                                                       │
+      │  1. POST /api/auth/login                              │
+      │     { email, password }                               │
+      │──────────────────────────────────────────────────────▶│
+      │                                                       │
+      │                                    2. Verify password │
+      │                                    3. Generate JWT    │
+      │                                                       │
+      │  4. Response { token: "eyJhbG..." }                   │
+      │◀──────────────────────────────────────────────────────│
+      │                                                       │
+      │  5. Simpan token di localStorage                      │
+      │                                                       │
+      │  6. GET /api/waste-points                             │
+      │     Header: Authorization: Bearer eyJhbG...           │
+      │──────────────────────────────────────────────────────▶│
+      │                                                       │
+      │                               7. Verify JWT           │
+      │                               8. Decode user info     │
+      │                               9. Process request      │
+      │                                                       │
+      │  10. Response { data: [...] }                         │
+      │◀──────────────────────────────────────────────────────│
+```
+
+---
+
+#### 2️⃣ Role-Based Access Control (RBAC)
+
+**Definisi Role:**
+
+| Role           | Deskripsi            | Level Akses                   |
+| :------------- | :------------------- | :---------------------------- |
+| 👑 **Admin**   | Administrator sistem | Full access ke semua fitur    |
+| 👷 **Petugas** | Petugas lapangan     | Kelola titik limbah & laporan |
+| 👤 **Warga**   | Pengguna biasa       | Buat laporan, lihat data      |
+
+**Matriks Hak Akses:**
+
+| Endpoint                    | Admin | Petugas | Warga |
+| :-------------------------- | :---: | :-----: | :---: |
+| `GET /waste-points`         |  ✅   |   ✅    |  ✅   |
+| `POST /waste-points`        |  ✅   |   ✅    |  ❌   |
+| `PUT /waste-points/:id`     |  ✅   |   ✅    |  ❌   |
+| `DELETE /waste-points/:id`  |  ✅   |   ❌    |  ❌   |
+| `GET /reports`              |  ✅   |   ✅    |  ❌   |
+| `POST /reports`             |  ✅   |   ✅    |  ✅   |
+| `PATCH /reports/:id/status` |  ✅   |   ✅    |  ❌   |
+| `GET /users`                |  ✅   |   ❌    |  ❌   |
+| `DELETE /users/:id`         |  ✅   |   ❌    |  ❌   |
+
+**Implementasi Role Middleware:**
+
+```typescript
+// app/middleware/Role.ts
+import type { HttpContext } from '@adonisjs/core/http'
+import type { NextFn } from '@adonisjs/core/types/http'
+
+export default class RoleMiddleware {
+  // Factory function untuk membuat middleware dengan roles tertentu
+  static authorize(allowedRoles: string[]) {
+    return async (ctx: HttpContext, next: NextFn) => {
+      const { response } = ctx
+      const user = ctx.user
+
+      // Cek apakah user sudah login
+      if (!user) {
+        return response.unauthorized({
+          success: false,
+          message: 'Silakan login terlebih dahulu',
+        })
+      }
+
+      // Cek apakah role user termasuk dalam allowed roles
+      if (!allowedRoles.includes(user.role)) {
+        return response.forbidden({
+          success: false,
+          message: `Akses ditolak. Role '${user.role}' tidak memiliki izin untuk aksi ini.`,
+          required_roles: allowedRoles,
+        })
+      }
+
+      await next()
+    }
+  }
+}
+```
+
+**Penggunaan di Routes:**
+
+```typescript
+// start/routes.ts
+import router from '@adonisjs/core/services/router'
+import AuthMiddleware from '#middleware/Auth'
+import RoleMiddleware from '#middleware/Role'
+
+// Public routes (tanpa auth)
+router.post('/api/auth/login', [AuthController, 'login'])
+router.post('/api/auth/register', [AuthController, 'register'])
+
+// Protected routes (perlu auth)
+router
+  .group(() => {
+    // Semua role bisa akses
+    router.get('/waste-points', [WastePointsController, 'index'])
+    router.post('/reports', [ReportsController, 'store'])
+
+    // Admin & Petugas only
+    router
+      .group(() => {
+        router.post('/waste-points', [WastePointsController, 'store'])
+        router.put('/waste-points/:id', [WastePointsController, 'update'])
+        router.patch('/reports/:id/status', [ReportsController, 'updateStatus'])
+      })
+      .middleware([RoleMiddleware.authorize(['admin', 'petugas'])])
+
+    // Admin only
+    router
+      .group(() => {
+        router.delete('/waste-points/:id', [WastePointsController, 'destroy'])
+        router.get('/users', [UsersController, 'index'])
+        router.delete('/users/:id', [UsersController, 'destroy'])
+      })
+      .middleware([RoleMiddleware.authorize(['admin'])])
+  })
+  .middleware([AuthMiddleware])
+```
+
+---
+
+#### 3️⃣ Password Hashing dengan Bcrypt
+
+**Mengapa Hashing?**
+
+- Password TIDAK BOLEH disimpan dalam bentuk plain text
+- Jika database bocor, password tetap aman
+- Bcrypt menggunakan salt untuk mencegah rainbow table attack
+
+**Implementasi:**
+
+```typescript
+// app/controllers/AuthController.ts
+import bcrypt from 'bcryptjs'
+
+// REGISTER - Hash password sebelum simpan
+async register({ request, response }: HttpContext) {
+  const { name, email, password, role } = request.body()
+
+  // Hash password dengan cost factor 10
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,  // Simpan hash, BUKAN plain text
+    role: role || 'warga'
+  })
+
+  return response.created({
+    success: true,
+    message: 'Registrasi berhasil'
+  })
+}
+
+// LOGIN - Bandingkan password dengan hash
+async login({ request, response }: HttpContext) {
+  const { email, password } = request.body()
+
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    return response.unauthorized({ message: 'Email tidak ditemukan' })
+  }
+
+  // Bandingkan plain password dengan hash di database
+  const isValid = await bcrypt.compare(password, user.password)
+
+  if (!isValid) {
+    return response.unauthorized({ message: 'Password salah' })
+  }
+
+  // Generate JWT token
+  const token = jwt.sign(
+    { userId: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET!,
+    { expiresIn: '7d' }
+  )
+
+  return response.json({ success: true, token })
+}
+```
+
+**Perbandingan Storage:**
+
+```
+❌ TIDAK AMAN (Plain Text)
+┌─────────────────────────────────────┐
+│ Database Users                      │
+├──────────────┬──────────────────────┤
+│ email        │ password             │
+├──────────────┼──────────────────────┤
+│ john@mail.com│ password123          │  ◄── Jika bocor, langsung ketahuan!
+│ jane@mail.com│ qwerty456            │
+└──────────────┴──────────────────────┘
+
+✅ AMAN (Bcrypt Hash)
+┌─────────────────────────────────────────────────────────────────┐
+│ Database Users                                                  │
+├──────────────┬──────────────────────────────────────────────────┤
+│ email        │ password                                         │
+├──────────────┼──────────────────────────────────────────────────┤
+│ john@mail.com│ $2a$10$X7UrE5Kx8VZqJhRzPmYK1u.Hw8HJnL9xYz...    │
+│ jane@mail.com│ $2a$10$N8PqF3Hy9WArKiTzQnXM2v.Jx9MKpL0aWb...    │
+└──────────────┴──────────────────────────────────────────────────┘
+                      │
+                      └── Tidak bisa di-reverse!
+```
+
+---
+
+#### 4️⃣ CORS (Cross-Origin Resource Sharing)
+
+**Apa itu CORS?**
+CORS adalah mekanisme keamanan browser yang membatasi request dari origin berbeda.
+
+**Konfigurasi di GeoWaste:**
+
+```typescript
+// config/cors.ts
+import { defineConfig } from '@adonisjs/cors'
+
+export default defineConfig({
+  enabled: true,
+
+  // Origin yang diizinkan
+  origin: [
+    'http://localhost:5500', // Live Server
+    'http://127.0.0.1:5500', // Live Server alt
+    'http://localhost:3333', // Same origin
+  ],
+
+  // Methods yang diizinkan
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+
+  // Headers yang diizinkan
+  headers: true,
+
+  // Izinkan credentials (cookies, auth headers)
+  credentials: true,
+
+  // Cache preflight request
+  maxAge: 90,
+})
+```
+
+**Ilustrasi CORS:**
+
+```
+✅ ALLOWED (Same Origin)
+┌──────────────────┐         ┌──────────────────┐
+│ localhost:3333   │ ──────▶ │ localhost:3333   │
+│ (Frontend)       │         │ (API)            │
+└──────────────────┘         └──────────────────┘
+
+✅ ALLOWED (Whitelisted Origin)
+┌──────────────────┐         ┌──────────────────┐
+│ localhost:5500   │ ──────▶ │ localhost:3333   │
+│ (Live Server)    │  CORS   │ (API)            │
+└──────────────────┘  OK     └──────────────────┘
+
+❌ BLOCKED (Unknown Origin)
+┌──────────────────┐         ┌──────────────────┐
+│ evil-site.com    │ ──X───▶ │ localhost:3333   │
+│ (Attacker)       │  CORS   │ (API)            │
+└──────────────────┘ BLOCKED └──────────────────┘
+```
+
+---
+
+#### 5️⃣ Environment Variables untuk Secrets
+
+**Best Practice:**
+
+- Semua secrets disimpan di `.env`
+- File `.env` TIDAK di-commit ke Git
+- Gunakan `.env.example` sebagai template
+
+```env
+# .env (TIDAK di-commit)
+JWT_SECRET=super-secret-key-yang-sangat-panjang-dan-random
+OPENWEATHER_API_KEY=abc123def456
+MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/db
+
+# .env.example (di-commit, tanpa nilai sensitif)
+JWT_SECRET=your-jwt-secret-here
+OPENWEATHER_API_KEY=your-api-key-here
+MONGO_URI=your-mongodb-uri-here
+```
+
+**Konfigurasi .gitignore:**
+
+```gitignore
+# .gitignore
+.env
+.env.local
+.env.production
+```
+
+---
+
+#### 6️⃣ Input Validation
+
+**Mengapa Validasi Penting?**
+
+- Mencegah SQL/NoSQL Injection
+- Mencegah XSS (Cross-Site Scripting)
+- Memastikan data sesuai format yang diharapkan
+
+**Implementasi:**
+
+```typescript
+// app/controllers/WastePointsController.ts
+async store({ request, response }: HttpContext) {
+  const { nama, deskripsi, latitude, longitude, jenis } = request.body()
+
+  // Validasi manual
+  const errors: string[] = []
+
+  if (!nama || typeof nama !== 'string' || nama.trim().length < 3) {
+    errors.push('Nama harus minimal 3 karakter')
+  }
+
+  if (!latitude || isNaN(parseFloat(latitude))) {
+    errors.push('Latitude harus berupa angka valid')
+  }
+
+  if (!longitude || isNaN(parseFloat(longitude))) {
+    errors.push('Longitude harus berupa angka valid')
+  }
+
+  const validJenis = ['organik', 'anorganik', 'B3', 'campuran']
+  if (!jenis || !validJenis.includes(jenis)) {
+    errors.push(`Jenis harus salah satu dari: ${validJenis.join(', ')}`)
+  }
+
+  if (errors.length > 0) {
+    return response.badRequest({
+      success: false,
+      message: 'Validasi gagal',
+      errors
+    })
+  }
+
+  // Lanjut proses jika validasi berhasil
+  const wastePoint = await WastePoint.create({ ... })
+}
+```
+
+---
+
+### 📊 Ringkasan Mekanisme Keamanan
+
+| No  | Mekanisme                 | Fungsi                        |    Status     |
+| :-: | :------------------------ | :---------------------------- | :-----------: |
+|  1  | **JWT Authentication**    | Verifikasi identitas user     |   ✅ Aktif    |
+|  2  | **Role-Based Access**     | Batasi akses berdasarkan role |   ✅ Aktif    |
+|  3  | **Bcrypt Hashing**        | Enkripsi password             |   ✅ Aktif    |
+|  4  | **CORS**                  | Batasi origin request         |   ✅ Aktif    |
+|  5  | **Environment Variables** | Sembunyikan secrets           |   ✅ Aktif    |
+|  6  | **Input Validation**      | Cegah injection attack        |   ✅ Aktif    |
+|  7  | **HTTPS**                 | Enkripsi data in transit      | ⏳ Production |
+
+---
+
+### 🔒 Security Headers (Rekomendasi Production)
+
+```typescript
+// Tambahkan di middleware untuk production
+response.header('X-Content-Type-Options', 'nosniff')
+response.header('X-Frame-Options', 'DENY')
+response.header('X-XSS-Protection', '1; mode=block')
+response.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+```
+
+---
+
 ## 📸 Screenshot
 
 <div align="center">
