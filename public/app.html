@@ -142,13 +142,17 @@
       </header>
 
       <!-- Navigation -->
-      <nav class="navbar">
-        <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
-        <button class="nav-btn" data-page="wastepoints">📍 Titik Limbah</button>
-        <button class="nav-btn" data-page="reports">📋 Laporan</button>
-        <button class="nav-btn" data-page="environment">🌡️ Lingkungan</button>
-        <button class="nav-btn admin-only" data-page="users" style="display: none">👥 User</button>
-      </nav>
+      <div class="navbar-wrapper">
+        <nav class="navbar">
+          <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
+          <button class="nav-btn" data-page="wastepoints">📍 Titik Limbah</button>
+          <button class="nav-btn" data-page="reports">📋 Laporan</button>
+          <button class="nav-btn" data-page="environment">🌡️ Lingkungan</button>
+          <button class="nav-btn admin-only" data-page="users" style="display: none">
+            👥 User
+          </button>
+        </nav>
+      </div>
 
       <!-- Dashboard Page -->
       <div id="dashboard" class="page-content active">
@@ -371,7 +375,9 @@
       <div id="reports" class="page-content" style="display: none">
         <div class="page-header">
           <h2>📋 Laporan</h2>
-          <button class="btn btn-primary" id="addReportBtn">+ Buat Laporan</button>
+          <button class="btn btn-primary warga-only" id="addReportBtn" style="display: none">
+            + Buat Laporan
+          </button>
         </div>
         <div class="filter-group">
           <select id="reportStatusFilter">

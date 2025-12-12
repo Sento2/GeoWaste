@@ -49,7 +49,7 @@ router
 
 // REPORTS
 router.get('/api/v1/reports', [ReportsController, 'index']).use([auth])
-router.post('/api/v1/reports', [ReportsController, 'store']).use([auth])
+router.post('/api/v1/reports', [ReportsController, 'store']).use([auth, role('warga')])
 router
   .patch('/api/v1/reports/:id/status', [ReportsController, 'updateStatus'])
   .use([auth, role('admin', 'petugas')])

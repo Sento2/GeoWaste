@@ -146,6 +146,11 @@ function showMainApp() {
     document.querySelectorAll('.staff-only').forEach((el) => (el.style.display = 'inline-block'))
   }
 
+  // Warga only - Tombol buat laporan
+  if (currentUser.role === 'warga') {
+    document.querySelectorAll('.warga-only').forEach((el) => (el.style.display = 'inline-block'))
+  }
+
   // Show dashboard by default
   navigateTo('dashboard')
 }
